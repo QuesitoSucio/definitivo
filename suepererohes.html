@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería de Personajes</title>
+    <link rel="stylesheet" href="supererohes.css">
+    <style>
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            text-align: center;
+        }
+        .character {
+            border: 3px solid #ccc;
+            padding: 10px;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        .character img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        .character img:hover {
+            transform: scale(1.05);
+        }
+        h3 {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="gallery">
+        <!-- Superman -->
+        <div class="character">
+            <img src="https://cdn.pixabay.com/photo/2023/10/12/17/30/ai-generated-8311353_1280.jpg" alt="Superman">
+            <h3>Superman</h3>
+            <p><strong>Características:</strong> Súper fuerza, vuelo, visión de rayos X, invulnerabilidad, aliento helado.</p>
+            <p><strong>Historia:</strong> Nacido en Krypton como Kal-El, fue enviado a la Tierra antes de la destrucción de su planeta. Criado como Clark Kent en Smallville, usa sus poderes para proteger la humanidad como Superman.</p>
+        </div>
+        
+        <!-- Batman -->
+        <div class="character">
+            <img src="https://cdn.pixabay.com/photo/2024/01/15/11/36/batman-8510022_1280.png" alt="Batman">
+            <h3>Batman</h3>
+            <p><strong>Características:</strong> Genio estratega, maestro en artes marciales, usa tecnología avanzada.</p>
+            <p><strong>Historia:</strong> Bruce Wayne presenció el asesinato de sus padres y juró combatir el crimen en Gotham. Sin poderes, usa su intelecto, habilidades físicas y recursos para luchar contra la injusticia como Batman.</p>
+        </div>
+        
+        <!-- Spider-Man -->
+        <div class="character">
+            <img src="https://cdn.pixabay.com/photo/2020/09/11/00/06/spiderman-5561671_1280.jpg" alt="Spider-Man">
+            <h3>Spider-Man</h3>
+            <p><strong>Características:</strong> Agilidad sobrehumana, trepa muros, sentido arácnido, lanza telarañas.</p>
+            <p><strong>Historia:</strong> Peter Parker fue mordido por una araña radiactiva y obtuvo habilidades arácnidas. Tras la muerte de su tío Ben, aprende que un gran poder conlleva una gran responsabilidad y se convierte en Spider-Man.</p>
+        </div>
+        
+        <!-- Wonder Woman -->
+        <div class="character">
+            <img src="https://cdn.pixabay.com/photo/2023/07/05/06/46/ai-generated-8107577_1280.jpg" alt="Wonder Woman">
+            <h3>Wonder Woman</h3>
+            <p><strong>Características:</strong> Fuerza sobrehumana, inmortalidad, reflejos mejorados, usa el Lazo de la Verdad.</p>
+            <p><strong>Historia:</strong> Diana es una princesa amazona creada por los dioses. Deja su hogar en Themyscira para ayudar a la humanidad y luchar por la justicia como Wonder Woman.</p>
+        </div>
+        
+        <!-- Iron Man -->
+        <div class="character">
+            <img src="https://cdn.pixabay.com/photo/2023/09/02/18/24/ai-generated-8229393_1280.png" alt="Iron Man">
+            <h3>Iron Man</h3>
+            <p><strong>Características:</strong> Intelecto de genio, traje de alta tecnología con armas avanzadas y vuelo.</p>
+            <p><strong>Historia:</strong> Tony Stark, un millonario ingeniero, creó su armadura para escapar de secuestradores y luego decidió usarla para proteger el mundo como Iron Man.</p>
+        </div>
+        
+        <!-- Hulk -->
+        <div class="character">
+            <img src="https://cdn.pixabay.com/photo/2023/06/29/02/54/hulk-8095537_1280.png" alt="Hulk">
+            <h3>Hulk</h3>
+            <p><strong>Características:</strong> Fuerza y resistencia ilimitadas, curación acelerada, mayor enojo = más poder.</p>
+            <p><strong>Historia:</strong> Bruce Banner fue expuesto a radiación gamma en un experimento fallido. Cuando se enfada, se transforma en el increíble Hulk, una bestia de fuerza colosal.</p>
+        </div>
+        
+        <!-- Capitán América -->
+        <div class="character">
+            <img src="https://i.pinimg.com/736x/a2/81/66/a2816638aa5363d7de7e26fa782378ba.jpg" alt="Capitán América">
+            <h3>Capitán América</h3>
+            <p><strong>Características:</strong> Fuerza y velocidad mejoradas, escudo indestructible, liderazgo.</p>
+            <p><strong>Historia:</strong> Steve Rogers se sometió a un experimento que lo convirtió en el supersoldado Capitán América, luchando por la justicia desde la Segunda Guerra Mundial.</p>
+        </div>
+        
+        <!-- Thor -->
+        <div class="character">
+            <img src="https://wallpapersmug.com/download/1224x1224/aa14f2/thor-marvel-comics-4k.jpg" alt="Thor">
+            <h3>Thor</h3>
+            <p><strong>Características:</strong> Dios del trueno, usa el martillo Mjolnir, fuerza y resistencia divinas.</p>
+            <p><strong>Historia:</strong> Hijo de Odín y príncipe de Asgard, lucha por la justicia tanto en la Tierra como en su mundo natal.</p>
+        </div>
+        
+        <!-- Capitana Marvel -->
+        <div class="character">
+            <img src="https://i.pinimg.com/474x/4d/18/c2/4d18c2f9b85a2b33d7e36c0e9e1d6485.jpg" alt="Capitana Marvel">
+            <h3>Capitana Marvel</h3>
+            <p><strong>Características:</strong> Vuelo, energía cósmica, fuerza sobrehumana, resistencia extrema.</p>
+            <p><strong>Historia:</strong> Carol Danvers obtuvo sus poderes tras un accidente con tecnología Kree y se convirtió en una de las heroínas más poderosas del universo.</p>
+        </div>
+    </div>
+</body>
+</html>
