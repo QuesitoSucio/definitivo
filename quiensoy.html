@@ -2,178 +2,227 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portafolio</title>
-    <style>
-        /* Estilo general */
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portafolio</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
 
-        /* Barra superior */
-        .navbar {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background-color: black;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-        }
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: black;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0px;
+      z-index: 1000;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
 
-        .navbar a {
-            text-decoration: none;
-            margin-left: 20px;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
+    .navbar a {
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
 
-        .navbar a.white-bold {
-            color: white;
-        }
+    .navbar a.white-bold {
+      color: white;
+    }
 
-        .navbar a.white-opacity {
-            color: rgba(255, 255, 255, 0.7);
-        }
+    .navbar a.white-opacity {
+      color: rgba(255, 255, 255, 0.7);
+    }
 
-        .navbar a:hover {
-            color: white;
-        }
+    .navbar a:hover {
+      color: white;
+    }
 
-        /* Secciones */
-        .section {
-            padding: 80px 20px;
-            margin-top: 60px;
-            text-align: center;
-        }
+    .section {
+      padding: 40px 20px;
+      margin-top: 0;
+      text-align: center;
+    }
 
-        .section:nth-child(odd) {
-            background-color: #fe5500;
-            color: #ffffff;
-        }
+    .section + .section {
+      margin-top: 20px;
+    }
 
-        .section:nth-child(even) {
-            background-color: #ffffff;
-        }
+    .section:nth-child(odd) {
+      background-color: #fe5500;
+      color: #ffffff;
+    }
 
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-        }
+    .section:nth-child(even) {
+      background-color: #ffffff;
+    }
 
-        .who-am-i img {
-            width: 100%;
-            max-width: 400px;
-            border-radius: 10px;
-        }
+    .section h2 {
+      font-size: 2.5rem;
+      color: #fe5500;
+      margin-bottom: 10px;
+    }
 
-        .who-am-i .content {
-            max-width: 600px;
-            text-align: left;
-        }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
 
-        /* Segunda fila */
-        .profile img {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            display: block;
-            margin: 0 auto;
-        }
+    .who-am-i img {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 10px;
+    }
 
-        /* Proyectos */
-        .projects .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
+    .who-am-i .content {
+      max-width: 600px;
+      text-align: left;
+    }
 
-        .project img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
+    .leer-mas-btn {
+      background-color: #fe5500;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
 
+    .leer-mas-btn:hover {
+      background-color: #e14a00;
+    }
 
-        @media (max-width: 768px) {
-            .row {
-                flex-direction: column;
-                text-align: center;
-            }
+    .profile img {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      display: block;
+      margin: 0 auto;
+    }
 
-            .who-am-i .content {
-                padding-left: 0;
-            }
-        }
-    </style>
+    .projects .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .project {
+      text-align: center;
+      padding: 20px;
+      height: 100%;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .project img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .project button {
+      background-color: #fe5500;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    .project button:hover {
+      background-color: #e14a00;
+    }
+
+    @media (max-width: 768px) {
+      .row {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .who-am-i .content {
+        padding-left: 0;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <div class="navbar">
-        <span>Duvan Torres</span>
-        <div>
-            <a href="#inicio" class="white-bold">Inicio</a>
-            <a href="#quien-soy" class="white-opacity">¿Quién soy?</a>
-            <a href="#mis-proyectos" class="white-opacity">Proyectos</a>
-        </div>
+  <div class="navbar">
+    <span>Duvan Torres</span>
+    <div>
+      <a href="#inicio" class="white-bold">Inicio</a>
+      <a href="#quien-soy" class="white-opacity">¿Quién soy?</a>
+      <a href="#mis-proyectos" class="white-opacity">Proyectos</a>
     </div>
+  </div>
 
-    <div id="inicio" class="section who-am-i">
-        <div class="row">
-            <img src="https://img.freepik.com/vector-premium/ilustracion-persona-frente-computadora_572499-137.jpg">
-            <div class="content">
-                <h2>¿Quién soy?</h2>
-                <p>Soy Duvan Andres Mantilla Torres, un aprendiz de programación...</p>
-            </div>
-        </div>
+  <div id="inicio" class="section who-am-i">
+    <div class="row">
+      <img src="https://img.freepik.com/vector-premium/ilustracion-persona-frente-computadora_572499-137.jpg" />
+      <div class="content">
+        <h2>¿Quién soy?</h2>
+        <p>
+          Soy Duvan Andres Mantilla Torres, un aprendiz de programación que está dando sus primeros pasos en el mundo del desarrollo web. Me apasiona resolver problemas, crear soluciones creativas y compartir lo que voy aprendiendo. Actualmente estoy enfocado en mejorar mis habilidades con HTML, CSS y JavaScript para algún día poder desarrollar aplicaciones completas y funcionales.
+        </p>
+        <button class="leer-mas-btn">Leer más</button>
+      </div>
     </div>
+  </div>
 
-    <div id="quien-soy" class="section profile">
-        <img
-            src="https://img.freepik.com/fotos-premium/perfil-persona-que-representa-usuario-objetivo-incluidos-objetivos-demograficos-puntos-dolor_1314467-90668.jpg">
-        <h1>Una persona promedio con ansias de aprender más.</h1>
-        <h2>- Duvan Torres</h2>
+  <div id="quien-soy" class="section profile">
+    <img src="https://img.freepik.com/fotos-premium/perfil-persona-que-representa-usuario-objetivo-incluidos-objetivos-demograficos-puntos-dolor_1314467-90668.jpg" />
+    <h1>
+      Soy Duvan Andres Mantilla Torres, un aprendiz de programación apasionado por el mundo del desarrollo web. Estoy en constante búsqueda de nuevos conocimientos, siempre dispuesto a enfrentar desafíos que me permitan crecer como persona y profesional. Me encanta explorar nuevas tecnologías, experimentar con código y crear cosas útiles desde cero.
+    </h1>
+    <h2>- Duvan Torres</h2>
+  </div>
+
+  <div id="mis-proyectos" class="section projects">
+    <h1>Mis proyectos</h1>
+    <div class="grid">
+      <div class="project">
+        <img src="https://www.snake.es/media/google-snake-juego.png" alt="Proyecto 1" />
+        <p><strong>El Gusanito:</strong> Mi intento de recrear el clásico juego de la serpiente usando HTML, CSS y JavaScript. Aún estoy mejorando el movimiento y las colisiones.</p>
+        <button>Ver proyecto</button>
+      </div>
+      <div class="project">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvLJtA6M7edAQEUhbncJthUWpgp8-ULhKWbg&s" alt="Proyecto 2" />
+        <p><strong>Lista de Tareas:</strong> Un pequeño proyecto donde aprendí a manejar eventos en JavaScript. Permite agregar y eliminar tareas, pero aún quiero mejorar el diseño.</p>
+        <button>Ver proyecto</button>
+      </div>
+      <div class="project">
+        <img src="https://img.freepik.com/vector-premium/fondo-mandala-es-perfecto-usar-varios-proyectos-como-carteles-volantes-tarjetas-mas_853938-58.jpg" alt="Proyecto 3" />
+        <p><strong>Galería de Imágenes:</strong> Una página donde practiqué el uso de CSS Grid y Flexbox. Las imágenes se ajustan automáticamente, pero quiero agregar efectos animados.</p>
+        <button>Ver proyecto</button>
+      </div>
+      <div class="project">
+        <img src="https://es.unesco.org/youth/toptips/user/pages/images/home-feature-two_mobile.png" alt="Proyecto 4" />
+        <p><strong>Mi Primera Calculadora:</strong> Un ejercicio para aprender a manipular el DOM. Puede sumar, restar, multiplicar y dividir, aunque el diseño aún es muy básico.</p>
+        <button>Ver proyecto</button>
+      </div>
     </div>
-
-    <div id="mis-proyectos" class="section projects">
-        <h1>Mis proyectos</h1>
-        <div class="grid">
-            <div class="project">
-                <img src="https://www.snake.es/media/google-snake-juego.png" alt="Proyecto 1">
-                <p><strong>El Gusanito:</strong> Mi intento de recrear el clásico juego de la serpiente usando HTML, CSS
-                    y JavaScript. Aún estoy mejorando el movimiento y las colisiones.</p>
-            </div>
-            <div class="project">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvLJtA6M7edAQEUhbncJthUWpgp8-ULhKWbg&s"
-                    alt="Proyecto 2">
-                <p><strong>Lista de Tareas:</strong> Un pequeño proyecto donde aprendí a manejar eventos en JavaScript.
-                    Permite agregar y eliminar tareas, pero aún quiero mejorar el diseño.</p>
-            </div>
-            <div class="project">
-                <img src="https://img.freepik.com/vector-premium/fondo-mandala-es-perfecto-usar-varios-proyectos-como-carteles-volantes-tarjetas-mas_853938-58.jpg"
-                    alt="Proyecto 3">
-                <p><strong>Galería de Imágenes:</strong> Una página donde practiqué el uso de CSS Grid y Flexbox. Las
-                    imágenes se ajustan automáticamente, pero quiero agregar efectos animados.</p>
-            </div>
-            <div class="project">
-                <img src="https://es.unesco.org/youth/toptips/user/pages/images/home-feature-two_mobile.png"
-                    alt="Proyecto 4">
-                <p><strong>Mi Primera Calculadora:</strong> Un ejercicio para aprender a manipular el DOM. Puede sumar,
-                    restar, multiplicar y dividir, aunque el diseño aún es muy básico.</p>
-            </div>
-
-        </div>
-    </div>
+  </div>
 </body>
 
 </html>
