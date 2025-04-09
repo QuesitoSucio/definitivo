@@ -52,11 +52,14 @@ body {
     margin-bottom: 20px;
     z-index: 0;
     top: 20px;
+    left: 0;
 }
 
 .extra-image {
-    width: 150px;
+    width: 250px; /* Ensanchado moderado */
     height: 150px;
+    object-fit: cover;
+    opacity: 1;
 }
 
 .lines {
@@ -81,7 +84,19 @@ body {
 .aptitudes {
     font-size: 18px;
     line-height: 1.5;
+    text-align: left; /* Alinea el texto a la izquierda */
 }
+
+.aptitudes ul {
+    padding-left: 10px;
+    list-style-position: inside;
+    margin: 0;
+}
+
+.aptitudes li {
+    margin-left: 0;
+}
+
 
 .right-column {
     padding: 20px;
