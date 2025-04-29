@@ -14,7 +14,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
     }
 
     .contenedor {
@@ -118,6 +118,7 @@
   </style>
 </head>
 <body>
+
   <div class="contenedor">
     <form id="formRegistro">
       <h2>Formulario de Registro</h2>
@@ -172,6 +173,8 @@
   </div>
 
   <script>
+    let indiceEdicion = null;
+
     document.getElementById("formRegistro").addEventListener("submit", function(e) {
       e.preventDefault();
 
@@ -197,13 +200,9 @@
           confirmButtonColor: '#a1887f',
           background: '#2b1d18',
           color: '#f5f5dc',
-          padding: '20px',
-          customClass: {
-            popup: 'swal-popup swal2-error'
-          },
+          padding: '20px'
         });
       } else {
-        // Crear objeto con datos
         const nuevoRegistro = {
           nombre: document.getElementById("nombre").value.trim(),
           apellidos: document.getElementById("apellidos").value.trim(),
@@ -214,22 +213,25 @@
           fecha: document.getElementById("fecha").value
         };
 
-        // Guardar en localStorage
         let registros = JSON.parse(localStorage.getItem("registrosUsuarios")) || [];
-        registros.push(nuevoRegistro);
+
+        if (indiceEdicion === null) {
+          registros.push(nuevoRegistro);
+        } else {
+          registros[indiceEdicion] = nuevoRegistro;
+          indiceEdicion = null;
+        }
+
         localStorage.setItem("registrosUsuarios", JSON.stringify(registros));
 
         Swal.fire({
-          title: '¡Registro Exitoso!',
-          text: 'Tu registro ha sido completado correctamente.',
+          title: '¡Registro exitoso!',
+          text: 'Tu registro ha sido guardado.',
           icon: 'success',
           confirmButtonColor: '#a1887f',
           background: '#1c1c1c',
           color: '#d8c3a5',
-          padding: '20px',
-          customClass: {
-            popup: 'swal-popup'
-          },
+          padding: '20px'
         }).then(() => {
           document.getElementById("formRegistro").reset();
         });
@@ -238,16 +240,115 @@
 
     function mostrarRegistros() {
       const registros = JSON.parse(localStorage.getItem("registrosUsuarios")) || [];
+
+      if (registros.length === 0) {
+        Swal.fire({
+          title: "Registros",
+          text: "No hay registros aún.",
+          background: '#1c1c1c',
+          color: '#d8c3a5',
+          confirmButtonColor: '#a1887f'
+        });
+        return;
+      }
+
+      let tablaHTML = `
+        <div style="overflow-x: auto;">
+          <table style="width:100%; border-collapse: collapse; color: #f5f5dc;">
+            <thead style="background-color: #4e342e;">
+              <tr>
+                <th style="padding: 8px; border: 1px solid #a1887f;">Nombre</th>
+                <th style="padding: 8px; border: 1px solid #a1887f;">Apellidos</th>
+                <th style="padding: 8px; border: 1px solid #a1887f;">Correo</th>
+                <th style="padding: 8px; border: 1px solid #a1887f;">Documento</th>
+                <th style="padding: 8px; border: 1px solid #a1887f;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      registros.forEach((r, index) => {
+        tablaHTML += `
+          <tr>
+            <td style="padding: 8px; border: 1px solid #a1887f;">${r.nombre}</td>
+            <td style="padding: 8px; border: 1px solid #a1887f;">${r.apellidos}</td>
+            <td style="padding: 8px; border: 1px solid #a1887f;">${r.correo}</td>
+            <td style="padding: 8px; border: 1px solid #a1887f;">${r.documento}</td>
+            <td style="padding: 8px; border: 1px solid #a1887f; text-align: center;">
+              <button onclick="editarRegistro(${index})" style="margin-bottom:5px;padding:5px 10px; background-color:#0277bd; color:#f5f5dc; border:none; border-radius:5px; cursor:pointer;">Editar</button><br>
+              <button onclick="eliminarRegistro(${index})" style="padding:5px 10px; background-color:#b71c1c; color:#f5f5dc; border:none; border-radius:5px; cursor:pointer;">Eliminar</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tablaHTML += `
+            </tbody>
+          </table>
+        </div>
+      `;
+
       Swal.fire({
         title: "Registros",
-        html: registros.length
-          ? registros.map(r => `
-            <p><strong>${r.nombre} ${r.apellidos}</strong><br>${r.correo} - ${r.documento}</p>
-          `).join('')
-          : "No hay registros aún.",
+        html: tablaHTML,
         background: '#1c1c1c',
         color: '#d8c3a5',
+        width: '800px',
         confirmButtonColor: '#a1887f'
+      });
+    }
+
+    function eliminarRegistro(indice) {
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esto!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        background: '#1c1c1c',
+        color: '#d8c3a5'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          let registros = JSON.parse(localStorage.getItem("registrosUsuarios")) || [];
+          registros.splice(indice, 1);
+          localStorage.setItem("registrosUsuarios", JSON.stringify(registros));
+          Swal.fire({
+            title: '¡Eliminado!',
+            text: 'El registro ha sido eliminado.',
+            icon: 'success',
+            confirmButtonColor: '#a1887f',
+            background: '#1c1c1c',
+            color: '#d8c3a5'
+          }).then(() => {
+            mostrarRegistros();
+          });
+        }
+      });
+    }
+
+    function editarRegistro(indice) {
+      const registros = JSON.parse(localStorage.getItem("registrosUsuarios")) || [];
+      const registro = registros[indice];
+
+      document.getElementById("nombre").value = registro.nombre;
+      document.getElementById("apellidos").value = registro.apellidos;
+      document.getElementById("telefono").value = registro.telefono;
+      document.getElementById("tipoDocumento").value = registro.tipoDocumento;
+      document.getElementById("documento").value = registro.documento;
+      document.getElementById("correo").value = registro.correo;
+      document.getElementById("fecha").value = registro.fecha;
+
+      indiceEdicion = indice;
+      Swal.fire({
+        title: 'Editar Registro',
+        text: 'Modifica los campos y guarda el formulario.',
+        icon: 'info',
+        confirmButtonColor: '#a1887f',
+        background: '#1c1c1c',
+        color: '#d8c3a5'
       });
     }
   </script>
