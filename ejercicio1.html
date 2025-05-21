@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restaurante</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #722727;
+    }
+
+    h1 {
+      text-align: center;
+      color: #c4c2c2c4;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 500px;
+      margin: auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    input, select, button {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    #mesas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+      background-color: white;
+    }
+
+    .libre {
+      background-color: #d4edda;
+    }
+
+    .reservada {
+      background-color: #fff3cd;
+    }
+
+    .ocupada {
+      background-color: #f8d7da;
+    }
+
+    img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .card p {
+      margin: 5px 0;
+    }
+
+    .acciones button {
+      margin-right: 5px;
+    }
+
+    #buscarMesaInput {
+      display: block;
+      margin: 20px auto;
+      padding: 10px;
+      width: 300px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Restaurante</h1>
+
+  <form id="formularioMesa">
+    <input type="text" id="nro" placeholder="Número de mesa" />
+    <input type="text" id="descripcion" placeholder="Descripción de la mesa" />
+    <input type="number" id="personas" placeholder="Número de personas" />
+    <select id="estado">
+      <option value="libre">Libre</option>
+      <option value="reservada">Reservada</option>
+      <option value="ocupada">Ocupada</option>
+    </select>
+    <button type="button" id="registrar">Guardar Mesa</button>
+  </form>
+
+  <!-- Buscar -->
+  <input type="text" id="buscarMesaInput" placeholder="Buscar por número de mesa..." />
+
+  <div id="mesas"></div>
+
+  <script>
+    let datosMesa = [];
+    let modo = 0;
+    let numMesa = "";
+
+    document.getElementById("registrar").addEventListener("click", () => {
+      if (modo === 0) {
+        guardarMesa();
+      } else {
+        editarMesa();
+      }
+    });
+
+    document.getElementById("buscarMesaInput").addEventListener("input", () => {
+      let filtro = document.getElementById("buscarMesaInput").value.trim();
+      if (filtro === "") {
+        pintarMesas();
+      } else {
+        let resultados = datosMesa.filter((m) => m.numero.includes(filtro));
+        pintarMesas(resultados);
+      }
+    });
+
+    function guardarMesa() {
+      let nro = document.getElementById("nro").value.trim();
+      let descripcion = document.getElementById("descripcion").value.trim();
+      let personas = document.getElementById("personas").value.trim();
+      let estado = document.getElementById("estado").value;
+
+      if (!nro || !descripcion || !personas || !estado) {
+        alert("Por favor complete todos los campos");
+        return;
+      }
+
+      // Validar si ya existe
+      if (datosMesa.some((m) => m.numero === nro)) {
+        alert("Ya existe una mesa con ese número");
+        return;
+      }
+
+      datosMesa.unshift({
+        numero: nro,
+        descripcion,
+        personas,
+        estado,
+      });
+
+      alert("Mesa registrada exitosamente");
+      limpiar();
+      pintarMesas();
+    }
+
+    function editarMesa() {
+      let indice = datosMesa.findIndex((m) => m.numero === numMesa);
+      datosMesa[indice] = {
+        numero: document.getElementById("nro").value.trim(),
+        descripcion: document.getElementById("descripcion").value.trim(),
+        personas: document.getElementById("personas").value.trim(),
+        estado: document.getElementById("estado").value,
+      };
+      modo = 0;
+      document.getElementById("registrar").textContent = "Guardar Mesa";
+      limpiar();
+      pintarMesas();
+    }
+
+    function limpiar() {
+      document.getElementById("nro").value = "";
+      document.getElementById("descripcion").value = "";
+      document.getElementById("personas").value = "";
+      document.getElementById("estado").value = "libre";
+    }
+// lista = datosMesa es el "por defecto", a pesar de no haber algo en datosMesa crea un espacio para almacenarlo, ya que siempre espera algo 
+    function pintarMesas(lista = datosMesa) {
+        console.log(lista);
+        
+      const contenedor = document.getElementById("mesas");
+      contenedor.innerHTML = "";
+
+
+      //el espacio para almacenar 
+      lista.forEach((item) => {
+        let card = document.createElement("div");
+        card.className = `card ${item.estado}`;
+
+        let img = document.createElement("img");
+        img.src = "https://img.freepik.com/vector-premium/dibujos-animados-mesa_119631-412.jpg";
+        card.appendChild(img);
+
+        let p1 = document.createElement("p");
+        p1.textContent = `Mesa: ${item.numero}`;
+
+        let p2 = document.createElement("p");
+        p2.textContent = `Descripción: ${item.descripcion}`;
+
+        let p3 = document.createElement("p");
+        p3.textContent = `Capacidad: ${item.personas} personas`;
+
+        let p4 = document.createElement("p");
+        p4.textContent = `Estado: ${item.estado}`;
+
+        let divAcciones = document.createElement("div");
+        divAcciones.classList.add("acciones");
+
+        let btnEditar = document.createElement("button");
+        btnEditar.textContent = "📝";
+        btnEditar.onclick = () => {
+          document.getElementById("nro").value = item.numero;
+          document.getElementById("descripcion").value = item.descripcion;
+          document.getElementById("personas").value = item.personas;
+          document.getElementById("estado").value = item.estado;
+          modo = 1;
+          numMesa = item.numero;
+          document.getElementById("registrar").textContent = "Editar Mesa";
+        };
+
+        let btnEliminar = document.createElement("button");
+        btnEliminar.textContent = "❌";
+        btnEliminar.onclick = () => {
+          datosMesa = datosMesa.filter((m) => m.numero !== item.numero);
+          pintarMesas();
+        };
+
+        divAcciones.appendChild(btnEditar);
+        divAcciones.appendChild(btnEliminar);
+
+        card.appendChild(p1);
+        card.appendChild(p2);
+        card.appendChild(p3);
+        card.appendChild(p4);
+        card.appendChild(divAcciones);
+
+        contenedor.appendChild(card);
+      });
+    }
+  </script>
+</body>
+
+</html>
