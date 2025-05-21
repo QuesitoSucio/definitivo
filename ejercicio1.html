@@ -7,14 +7,21 @@
   <title>Restaurante</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #722727;
+      font-family: Georgia, serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                  url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff8e7;
     }
 
     h1 {
       text-align: center;
-      color: #c4c2c2c4;
+      color: #f4d03f;
+      font-size: 2.8em;
+      margin-top: 30px;
+      text-shadow: 2px 2px #000;
     }
 
     form {
@@ -22,82 +29,112 @@
       flex-direction: column;
       gap: 15px;
       max-width: 500px;
-      margin: auto;
-      background-color: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin: 30px auto;
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+      color: #333;
     }
 
     input, select, button {
-      padding: 10px;
-      border-radius: 5px;
+      padding: 12px;
+      border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 16px;
+      font-family: Georgia, serif;
     }
 
     button {
-      background-color: #333;
+      background-color: #a93226;
       color: white;
-      cursor: pointer;
-      transition: background-color 0.3s;
+      font-weight: bold;
+      border: none;
+      transition: background-color 0.3s ease;
     }
 
     button:hover {
-      background-color: #555;
-    }
-
-    #mesas {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-
-    .card {
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
-      background-color: white;
-    }
-
-    .libre {
-      background-color: #d4edda;
-    }
-
-    .reservada {
-      background-color: #fff3cd;
-    }
-
-    .ocupada {
-      background-color: #f8d7da;
-    }
-
-    img {
-      width: 100%;
-      border-radius: 10px;
-    }
-
-    .card p {
-      margin: 5px 0;
-    }
-
-    .acciones button {
-      margin-right: 5px;
+      background-color: #922b21;
     }
 
     #buscarMesaInput {
       display: block;
       margin: 20px auto;
-      padding: 10px;
-      width: 300px;
+      padding: 12px;
+      width: 320px;
+      border-radius: 8px;
       font-size: 16px;
+      border: none;
+    }
+
+    #mesas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .card {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+      background-color: #fefefe;
+      color: #333;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    .libre {
+      border-left: 8px solid #28a745;
+    }
+
+    .reservada {
+      border-left: 8px solid #ffc107;
+    }
+
+    .ocupada {
+      border-left: 8px solid #dc3545;
+    }
+
+    img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .card p {
+      margin: 10px;
+      font-size: 15px;
+    }
+
+    .acciones {
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px;
+    }
+
+    .acciones button {
+      margin-left: 10px;
+      background-color: #6c3483;
+      border: none;
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+
+    .acciones button:hover {
+      background-color: #512e5f;
     }
   </style>
 </head>
 
 <body>
-  <h1>Restaurante</h1>
+  <h1>Gestión de Mesas - Restaurante</h1>
 
   <form id="formularioMesa">
     <input type="text" id="nro" placeholder="Número de mesa" />
@@ -111,12 +148,13 @@
     <button type="button" id="registrar">Guardar Mesa</button>
   </form>
 
-  <!-- Buscar -->
   <input type="text" id="buscarMesaInput" placeholder="Buscar por número de mesa..." />
 
   <div id="mesas"></div>
 
+  <!-- Tu mismo script de JavaScript sin cambios -->
   <script>
+    // JS sin cambios
     let datosMesa = [];
     let modo = 0;
     let numMesa = "";
@@ -150,7 +188,6 @@
         return;
       }
 
-      // Validar si ya existe
       if (datosMesa.some((m) => m.numero === nro)) {
         alert("Ya existe una mesa con ese número");
         return;
@@ -188,15 +225,11 @@
       document.getElementById("personas").value = "";
       document.getElementById("estado").value = "libre";
     }
-// lista = datosMesa es el "por defecto", a pesar de no haber algo en datosMesa crea un espacio para almacenarlo, ya que siempre espera algo 
+
     function pintarMesas(lista = datosMesa) {
-        console.log(lista);
-        
       const contenedor = document.getElementById("mesas");
       contenedor.innerHTML = "";
 
-
-      //el espacio para almacenar 
       lista.forEach((item) => {
         let card = document.createElement("div");
         card.className = `card ${item.estado}`;
