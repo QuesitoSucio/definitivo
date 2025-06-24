@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Citas Veterinarias</title>
+    <link rel="stylesheet" href="citass.css">
+</head>
+
+<body>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Referencias a elementos del DOM  
+            //DOM = Interfaz. Facilita una representación estructurada del documento y define de qué manera los programas pueden acceder, al fin de modificar, tanto su estructura, estilo y contenido. 
+            const btnNuevaCita = document.getElementById('btnNuevaCita');
+            const citaModal = document.getElementById('citaModal');
+            const closeButtons = document.querySelectorAll('.close-button');
+            const citaForm = document.getElementById('citaForm');
+            const citasContainer = document.getElementById('citasContainer');
+            const noCitasMessage = document.getElementById('noCitasMessage');
+            const modalTitle = document.getElementById('modalTitle');
+            const citaIdInput = document.getElementById('citaId'); // Campo oculto para el ID de la cita
+            const filterEstado = document.getElementById('filterEstado');
+            const searchInput = document.getElementById('searchInput');
+
+            const nombreMascotaInput = document.getElementById('nombreMascota');
+            const nombrePropietarioInput = document.getElementById('nombrePropietario');
+            const telefonoInput = document.getElementById('telefono');
+            const fechaCitaInput = document.getElementById('fechaCita');
+            const horaCitaInput = document.getElementById('horaCita');
+            const tipoMascotaInput = document.getElementById('tipoMascota');
+            const sintomasInput = document.getElementById('sintomas');
+
+            const confirmModal = document.getElementById('confirmModal');
+            const btnConfirmEliminar = document.getElementById('btnConfirmEliminar');
+            const btnCancelEliminar = document.getElementById('btnCancelEliminar');
+            let citaToDeleteId = null; // Para guardar el ID de la cita a eliminar
+
+            // Array para almacenar las citas
+            let citas = JSON.parse(localStorage.getItem('citas'));
+
+            // --- Funciones para manejar Modales ---
+
+            function openModal(modal) {
+                modal.style.display = 'block';
+            }
+
+            function closeModal(modal) {
+                modal.style.display = 'none';
+            }
+
+            btnNuevaCita.addEventListener('click', () => {
+                // Reiniciar el formulario para nueva cita
+                citaForm.reset();
+                citaIdInput.value = '';
+                modalTitle.textContent = 'Nueva Cita';
+                openModal(citaModal);
+            });
+
+            closeButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    closeModal(e.target.closest('.modal'));
+                });
+            });
+
+            // Cerrar modal al hacer clic fuera del contenido
+            window.addEventListener('click', (event) => {
+                if (event.target === citaModal) {
+                    closeModal(citaModal);
+                }
+                // if (event.target === confirmModal) {
+                //     closeModal(confirmModal);
+                // }
+            });
+
+            // --- Función para mostrar/actualizar citas en el DOM ---
+            function displayCitas(citasToShow) {
+                citasContainer.innerHTML = '';
+                if (citasToShow.length === 0) {
+                    noCitasMessage.style.display = 'block';
+                    return;
+                } else {
+                    noCitasMessage.style.display = 'none';
+                }
+
+                citasToShow.forEach(cita => {
+                    const citaCard = document.createElement('div');
+                    citaCard.classList.add('appointment-card');
+                    citaCard.setAttribute('data-id', cita.id);
+
+                    let statusColor = '';
+                    if (cita.estado === 'abierta') {
+                        statusColor = '#28a745';
+                    } else if (cita.estado === 'terminada') {
+                        statusColor = '#6c757d';
+                    } else if (cita.estado == 'anulada') {
+                        statusColor = '#dc3545';
+                    } else {
+                        statusColor = '#000000';
+                    }
+
+
+                    citaCard.innerHTML = `
+                <h3>${cita.nombreMascota}</h3>
+                <p><strong>Propietario:</strong> ${cita.nombrePropietario}</p>
+                <p><strong>Teléfono:</strong> ${cita.telefono}</p>
+                <p><strong>Fecha:</strong> ${cita.fechaCita}</p>
+                <p><strong>Hora:</strong> ${cita.horaCita}</p>
+                <p><strong>Tipo Mascota:</strong> ${cita.tipoMascota.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
+                <p><strong>Síntomas:</strong> ${cita.sintomas}</p>
+                <p><strong>Estado:</strong> <span style="color: ${statusColor}; font-weight: bold;">${cita.estado.charAt(0).toUpperCase() + cita.estado.slice(1)}</span></p>
+                <div class="actions">
+                    <button class="edit-button">Editar</button>
+                    <button class="delete-button">Eliminar</button>
+                    <button class="change-status-button" data-current-status="${cita.estado}">Cambiar Estado</button>
+                </div>
+            `;
+
+                    // Eventos para los botones dentro de la tarjeta
+                    citaCard.querySelector('.edit-button').addEventListener('click', () => editCita(cita.id));
+                    citaCard.querySelector('.delete-button').addEventListener('click', () => openConfirmModal(cita.id));
+                    citasContainer.appendChild(citaCard);
+                });
+            }
+
+            // --- Función para guardar/editar una cita ---
+
+            citaForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!citaForm.checkValidity()) {
+                    alert('Por favor, completa todos los campos requeridos correctamente.');
+                    return;
+                }
+
+                const newCita = {
+                    nombreMascota: nombreMascotaInput.value.trim(),
+                    nombrePropietario: nombrePropietarioInput.value.trim(),
+                    telefono: telefonoInput.value.trim(),
+                    fechaCita: fechaCitaInput.value,
+                    horaCita: horaCitaInput.value,
+                    tipoMascota: tipoMascotaInput.value,
+                    sintomas: sintomasInput.value.trim(),
+                    estado: 'abierta'
+                };
+
+                const citaId = citaIdInput.value;
+
+                if (citaId) {
+                    // Editar cita existente
+                    const index = citas.findIndex(c => c.id === parseInt(citaId));
+                    if (index !== -1) {
+                        // Mantener el estado actual si se edita
+                        newCita.id = citas[index].id;
+                        citas[index] = newCita;
+                    }
+                } else {
+                    // Nueva cita
+                    newCita.id = Date.now();
+                    citas.push(newCita);
+                }
+
+                localStorage.setItem('citas', JSON.stringify(citas)); // Guardar en localStorage
+                closeModal(citaModal);
+                applyFiltersAndSearch(); // Refrescar la lista de citas
+            });
+
+            // --- Función para editar---
+
+            function editCita(id) {
+                const cita = citas.find(c => c.id === id);
+                if (cita) {
+                    modalTitle.textContent = 'Editar Cita';
+                    citaIdInput.value = cita.id;
+                    nombreMascotaInput.value = cita.nombreMascota;
+                    nombrePropietarioInput.value = cita.nombrePropietario;
+                    telefonoInput.value = cita.telefono;
+                    fechaCitaInput.value = cita.fechaCita;
+                    horaCitaInput.value = cita.horaCita;
+                    tipoMascotaInput.value = cita.tipoMascota;
+                    sintomasInput.value = cita.sintomas;
+                    openModal(citaModal);
+                }
+            }
+
+            // --- Funciones para eliminar---
+
+            function openConfirmModal(id) {
+                citaToDeleteId = id;
+                openModal(confirmModal);
+            }
+
+            btnConfirmEliminar.addEventListener('click', () => {
+                if (citaToDeleteId !== null) {
+                    citas = citas.filter(c => c.id !== citaToDeleteId);
+                    applyFiltersAndSearch();
+                    closeModal(confirmModal);
+                    citaToDeleteId = null; // Limpiar el ID de todo 
+                }
+            });
+
+            btnCancelEliminar.addEventListener('click', () => {
+                closeModal(confirmModal);
+                citaToDeleteId = null;
+            });
+
+            // --- Función para cambiar el estado de la cita ---
+
+            function toggleStatus(id, buttonElement) {
+                const cita = citas.find(c => c.id === id);
+                if (cita) {
+                    const currentStatus = cita.estado;
+                    let newStatus;
+
+                    if (currentStatus === 'abierta') {
+                        newStatus = 'terminada';
+                    } else if (currentStatus === 'terminada') {
+                        newStatus = 'anulada';
+                    } else {
+                        newStatus = 'abierta';
+                    }
+
+                    cita.estado = newStatus;
+                    localStorage.setItem('citas', JSON.stringify(cita))
+                    applyFiltersAndSearch();
+                }
+            }
+
+            // --- Funciones de filtrado y búsqueda ---
+
+            function applyFiltersAndSearch() {
+                let filteredCitas = [...citas];
+
+                // 1. Filtrar por estado
+                const estadoFilter = filterEstado.value;
+                if (estadoFilter !== 'todas') {
+                    filteredCitas = filteredCitas.filter(cita => cita.estado === estadoFilter);
+                }
+
+                // 2. Buscar por nombre de mascota o propietario
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                if (searchTerm) {
+                    filteredCitas = filteredCitas.filter(cita =>
+                        cita.nombreMascota.toLowerCase().includes(searchTerm) ||
+                        cita.nombrePropietario.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                // Ordenar citas: primero abiertas, luego terminadas, luego anuladas, y por fecha/hora, etc..
+                filteredCitas.sort((a, b) => {
+                    const statusOrder = { 'abierta': 1, 'terminada': 2, 'anulada': 3 };
+                    if (statusOrder[a.estado] !== statusOrder[b.estado]) {
+                        return statusOrder[a.estado] - statusOrder[b.estado];
+                    }
+                    // Si el estado es el mismo, ordenar por fecha y hora
+                    const dateA = new Date(`${a.fechaCita}T${a.horaCita}`);
+                    const dateB = new Date(`${b.fechaCita}T${b.horaCita}`);
+                    return dateA - dateB;
+                });
+
+                displayCitas(filteredCitas);
+            }
+
+            // Event listeners para filtros y búsqueda
+            filterEstado.addEventListener('change', applyFiltersAndSearch);
+            searchInput.addEventListener('input', applyFiltersAndSearch);
+
+
+        });
+    </script>
+
+    <header>
+        <h1>Administrador de Citas</h1>
+    </header>
+
+    <main>
+        <section class="controls">
+            <button id="btnNuevaCita">
+                Nueva Cita
+            </button>
+
+            <div class="filters">
+                <label for="filterEstado">Filtrar por Estado:</label>
+                <select id="filterEstado">
+                    <option value="todas">Todas</option>
+                    <option value="abierta">Abierta</option>
+                    <option value="terminada">Terminada</option>
+                    <option value="anulada">Anulada</option>
+                </select>
+            </div>
+
+            <div class="search">
+                <label for="searchInput">Buscar Cita:</label>
+                <input type="text" id="searchInput" placeholder="Nombre de Mascota o Propietario">
+            </div>
+        </section>
+
+        <section class="appointments-list">
+            <h2>Próximas Citas</h2>
+            <div id="citasContainer" class="citas-grid">
+                <p id="noCitasMessage">No hay citas aún.</p>
+            </div>
+        </section>
+    </main>
+
+    <div id="citaModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 id="modalTitle">Nueva Cita</h2>
+            <form id="citaForm">
+                <input type="hidden" id="citaId" value="">
+                <div class="form-group">
+                    <label for="nombreMascota">Nombre de Mascota:</label>
+                    <input type="text" id="nombreMascota" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nombrePropietario">Nombre de Propietario:</label>
+                    <input type="text" id="nombrePropietario" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" required pattern="[0-9]*" title="Solo números">
+                </div>
+
+                <div class="form-group">
+                    <label for="fechaCita">Fecha de Cita:</label>
+                    <input type="date" id="fechaCita" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="horaCita">Hora de la Cita:</label>
+                    <input type="time" id="horaCita" required min="08:00" max="20:00">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipoMascota">Tipo de Mascota:</label>
+                    <select id="tipoMascota" required>
+                        <option value="">-- Seleccione --</option>
+                        <optgroup label="Caninos">
+                            <option value="chihuahua">Chihuahua</option>
+                            <option value="labrador_retriever">Labrador Retriever</option>
+                            <option value="pastor_aleman">Pastor Alemán</option>
+                            <option value="golden_retriever">Golden Retriever</option>
+                            <option value="poodle">Poodle</option>
+                            <option value="bulldog_frances">Bulldog Francés</option>
+                            <option value="dachshund">Dachshund (Salchicha)</option>
+                            <option value="yorkshire_terrier">Yorkshire Terrier</option>
+                            <option value="rottweiler">Rottweiler</option>
+                            <option value="shih_tzu">Shih Tzu</option>
+                            <option value="boxer">Bóxer</option>
+                            <option value="siberian_husky">Siberian Husky</option>
+                            <option value="dalmata">Dálmata</option>
+                            <option value="beagle">Beagle</option>
+                            <option value="mestizo_canino">Mestizo Canino</option>
+                        </optgroup>
+                        <optgroup label="Felinos">
+                            <option value="siames">Siamés</option>
+                            <option value="persa">Persa</option>
+                            <option value="maine_coon">Maine Coon</option>
+                            <option value="bengali">Bengalí</option>
+                            <option value="esfinge">Esfinge (Sphynx)</option>
+                            <option value="ragdoll">Ragdoll</option>
+                            <option value="abisinio">Abisinio</option>
+                            <option value="britanico_pelo_corto">Británico de Pelo Corto</option>
+                            <option value="burmes">Burmés</option>
+                            <option value="oriental_pelo_corto">Oriental de Pelo Corto</option>
+                            <option value="angora_turco">Angora Turco</option>
+                            <option value="birmano">Birmano</option>
+                            <option value="exotico_pelo_corto">Exótico de Pelo Corto</option>
+                            <option value="siberiano">Siberiano</option>
+                            <option value="mestizo_felino">Mestizo Felino</option>
+                        </optgroup>
+                        <optgroup label="Aves">
+                            <option value="periquito">Periquito</option>
+                            <option value="canario">Canario</option>
+                            <option value="ninfa">Ninfa (Cacatúa Ninfa)</option>
+                            <option value="agapornis">Agapornis (Inseparable)</option>
+                            <option value="loro_gris_africano">Loro Gris Africano (Yaco)</option>
+                            <option value="cacatua">Cacatúa</option>
+                            <option value="guacamayo">Guacamayo</option>
+                            <option value="pinzon_cebra">Pinzón Cebra</option>
+                            <option value="cotorra_argentina">Cotorra Argentina (Perico Monje)</option>
+                            <option value="diamante_mandarin">Diamante Mandarín</option>
+                            <option value="cernicalo">Cernícalo</option>
+                            <option value="halcon">Halcón</option>
+                            <option value="buho">Búho</option>
+                            <option value="codorniz">Codorniz</option>
+                            <option value="pavo_real">Pavo Real</option>
+                        </optgroup>
+                        <optgroup label="Roedores">
+                            <option value="hamster_sirio">Hámster Sirio</option>
+                            <option value="hamster_ruso">Hámster Ruso</option>
+                            <option value="conejillo_indias">Conejillo de Indias (Cobaya)</option>
+                            <option value="jerbo">Jerbo</option>
+                            <option value="raton_laboratorio">Ratón de Laboratorio</option>
+                            <option value="rata_domestica">Rata Doméstica</option>
+                            <option value="chinchilla">Chinchilla</option>
+                            <option value="degu">Degú</option>
+                            <option value="petauro_azucar">Petauro del Azúcar</option>
+                            <option value="ardilla_listada">Ardilla Listada</option>
+                            <option value="ardilla_coreana">Ardilla Coreana</option>
+                            <option value="jerbillo">Jerbillo</option>
+                            <option value="raton_egipcio">Ratón Egipcio</option>
+                            <option value="lemming">Lemming</option>
+                            <option value="lirón">Lirón</option>
+                        </optgroup>
+                        <optgroup label="Reptiles">
+                            <option value="tortuga_tierra">Tortuga de Tierra (Mediterránea)</option>
+                            <option value="tortuga_acuatica">Tortuga Acuática (Orejas Rojas)</option>
+                            <option value="iguana_verde">Iguana Verde</option>
+                            <option value="gecko_leopardo">Gecko Leopardo</option>
+                            <option value="dragon_barbudo">Dragón Barbudo</option>
+                            <option value="serpiente_maiz">Serpiente del Maíz</option>
+                            <option value="piton_bola">Pitón Bola</option>
+                            <option value="camaleon_pantera">Camaleón Pantera</option>
+                            <option value="boa_constrictor">Boa Constrictor</option>
+                            <option value="teju_argentino">Tejú Argentino</option>
+                            <option value="lagarto_monitor">Lagarto Monitor</option>
+                            <option value="gekko_crested">Gekko Crested</option>
+                            <option value="cocodrilo_caiman">Caimán (Pequeño)</option>
+                            <option value="camaleon_velo">Camaleón de Velo</option>
+                            <option value="serpiente_rey_california">Serpiente Rey de California</option>
+                        </optgroup>
+                        <optgroup label="Peces">
+                            <option value="pez_guppy">Pez Guppy</option>
+                            <option value="pez_betta">Pez Betta (Luchador de Siam)</option>
+                            <option value="pez_neon">Pez Neón</option>
+                            <option value="pez_goldfish">Pez Goldfish (Carpa Dorada)</option>
+                            <option value="corydora">Corydora</option>
+                            <option value="platy">Platy</option>
+                            <option value="molly">Molly</option>
+                            <option value="disco">Disco</option>
+                            <option value="pez_angel">Pez Ángel</option>
+                            <option value="tetra_cardenal">Tetra Cardenal</option>
+                            <option value="pez_cebra">Pez Cebra</option>
+                            <option value="pez_gato">Pez Gato</option>
+                            <option value="kois">Kois</option>
+                            <option value="pez_payaso">Pez Payaso</option>
+                            <option value="pez_globo">Pez Globo</option>
+                        </optgroup>
+                        <optgroup label="Conejos">
+                            <option value="mini_lop">Mini Lop</option>
+                            <option value="netherland_dwarf">Netherland Dwarf (Enano Holandés)</option>
+                            <option value="holandes">Holandés</option>
+                            <option value="angora_conejo">Angora</option>
+                            <option value="belier_conejo">Belier</option>
+                            <option value="rex_conejo">Rex</option>
+                            <option value="gigante_flamenco">Gigante Flamenco</option>
+                            <option value="california_conejo">California</option>
+                            <option value="hotot_enano">Hotot Enano</option>
+                            <option value="lionhead">Lionhead (Cabeza de León)</option>
+                            <option value="mini_rex">Mini Rex</option>
+                            <option value="dutch_conejo">Dutch</option>
+                            <option value="jersey_wooly">Jersey Wooly</option>
+                            <option value="flemish_giant">Flemish Giant</option>
+                            <option value="harlequin">Harlequin</option>
+                        </optgroup>
+                        <optgroup label="Hurones">
+                            <option value="huron_albino">Albino</option>
+                            <option value="huron_sable">Sable</option>
+                            <option value="huron_chocolate">Chocolate</option>
+                            <option value="huron_champagne">Champagne</option>
+                            <option value="huron_plata">Plata</option>
+                            <option value="huron_negro">Negro</option>
+                            <option value="huron_dew">Dark Eyed White (DEW)</option>
+                            <option value="huron_cinnamon">Cinnamon</option>
+                            <option value="huron_panda">Panda</option>
+                            <option value="huron_roan">Roan</option>
+                            <option value="huron_marmol">Mármol</option>
+                            <option value="huron_mitt">Mitt</option>
+                            <option value="huron_blaze">Blaze</option>
+                            <option value="huron_solid">Solid</option>
+                            <option value="huron_self">Self</option>
+                        </optgroup>
+                        <optgroup label="Anfibios">
+                            <option value="rana_arbol_ojos_rojos">Rana de Árbol Ojos Rojos</option>
+                            <option value="sapo_comun">Sapo Común</option>
+                            <option value="axolote">Axolote</option>
+                            <option value="triton_iberico">Tritón Ibérico</option>
+                            <option value="rana_pacman">Rana Pacman (Ceratophrys)</option>
+                            <option value="dendrobates">Dendrobates (Rana Flecha Venenosa)</option>
+                            <option value="salamandra_tigre">Salamandra Tigre</option>
+                            <option value="rana_arbol_cera">Rana de Árbol de la Cera</option>
+                            <option value="rana_toro_americana">Rana Toro Americana</option>
+                            <option value="cecilia">Cecilia</option>
+                            <option value="salamandra_fuego">Salamandra de Fuego</option>
+                            <option value="triton_cresta">Tritón Crestado</option>
+                            <option value="rana_tomate">Rana Tomate</option>
+                            <option value="rana_leopardo">Rana Leopardo</option>
+                            <option value="sapo_marino">Sapo Marino</option>
+                        </optgroup>
+                        <optgroup label="Equinos">
+                            <option value="pura_sangre">Pura Sangre</option>
+                            <option value="caballo_arabe">Caballo Árabe</option>
+                            <option value="andaluz">Andaluz</option>
+                            <option value="poni_shetland">Poni Shetland</option>
+                            <option value="quarter_horse">Quarter Horse</option>
+                            <option value="appaloosa">Appaloosa</option>
+                            <option value="fjord">Fjord</option>
+                            <option value="troton_americano">Trotón Americano</option>
+                            <option value="clydesdale">Clydesdale</option>
+                            <option value="paso_fino">Paso Fino</option>
+                            <option value="frison">Frisón</option>
+                            <option value="belga">Caballo Belga</option>
+                            <option value="percheron">Percherón</option>
+                            <option value="mustang">Mustang</option>
+                            <option value="burro">Burro</option>
+                        </optgroup>
+                        <optgroup label="Mamíferos Pequeños (Otros)">
+                            <option value="erizo_africano">Erizo Africano</option>
+                            <option value="chinchilla_mamifero">Chinchilla</option>
+                            <option value="petauro_azucar_mamifero">Petauro del Azúcar</option>
+                            <option value="mofeta_domesticada">Mofeta (Domesticada)</option>
+                            <option value="mapache_domesticado">Mapache (Domesticado)</option>
+                            <option value="marmota">Marmota</option>
+                            <option value="ardilla_voladora">Ardilla Voladora</option>
+                            <option value="nutria_enana">Nutria Enana</option>
+                            <option value="capibara">Capibara</option>
+                            <option value="zorro_fennec">Zorro Fennec</option>
+                            <option value="serval_mamifero">Serval (Híbrido)</option>
+                            <option value="puercoespin">Puercoespín</option>
+                            <option value="kinkajou">Kinkajou</option>
+                            <option value="wallaby">Wallaby</option>
+                            <option value="perezoso">Perezoso (Mascota Exótica)</option>
+                        </optgroup>
+                        <optgroup label="Mascotas de Granja">
+                            <option value="minipig">Minipig (Cerdo)</option>
+                            <option value="cabra_enana">Cabra Enana</option>
+                            <option value="oveja_ouessant">Oveja Ouessant</option>
+                            <option value="gallina_razas">Gallina (varias razas)</option>
+                            <option value="pato_razas">Pato (varias razas)</option>
+                            <option value="ganso">Ganso</option>
+                            <option value="burro_enano">Burro Enano</option>
+                            <option value="vaca_miniatura">Vaca Miniatura</option>
+                            <option value="llama">Llama</option>
+                            <option value="alpaca">Alpaca</option>
+                            <option value="pavo">Pavo</option>
+                            <option value="conejos_gigantes">Conejos Gigantes (Granja)</option>
+                            <option value="pollos_ornamentales">Pollos Ornamentales</option>
+                            <option value="codorniz_granja">Codorniz</option>
+                            <option value="huron_granja">Hurón (para control de plagas)</option>
+                        </optgroup>
+                        <optgroup label="Invertebrados">
+                            <option value="tarantula_chilena">Tarántula (Rosa Chilena)</option>
+                            <option value="escorpion_emperador">Escorpión Emperador</option>
+                            <option value="mantis_religiosa">Mantis Religiosa</option>
+                            <option value="hormiga_cortadora">Hormiga Cortadora</option>
+                            <option value="ciempies_gigante">Ciempiés Gigante</option>
+                            <option value="cangrejo_ermitano">Cangrejo Ermitaño</option>
+                            <option value="langosta_agua_dulce">Langosta de Agua Dulce</option>
+                            <option value="babosa_mar">Babosa de Mar</option>
+                            <option value="mariposa_larva">Mariposa (en etapa de larva/crisálida)</option>
+                            <option value="grillo">Grillo (como mascota o alimento)</option>
+                            <option value="cucarachas_madagascar">Cucarachas de Madagascar</option>
+                            <option value="milpies_gigante">Milpiés Gigante</option>
+                            <option value="caracol_gigante_africano">Caracol Gigante Africano</option>
+                            <option value="escolopendra">Escolopendra</option>
+                            <option value="araña_viuda_negra">Araña Viuda Negra (Cuidado)</option>
+                        </optgroup>
+                        <optgroup label="Animales Salvajes (Rescate)">
+                            <option value="zorro_rescate">Zorro</option>
+                            <option value="coyote_rescate">Coyote</option>
+                            <option value="oso_rescate">Oso (Osezno)</option>
+                            <option value="ciervo_rescate">Ciervo</option>
+                            <option value="buho_rescate">Búho</option>
+                            <option value="halcon_rescate">Halcón</option>
+                            <option value="lince_rescate">Lince</option>
+                            <option value="mapache_rescate_salvaje">Mapache</option>
+                            <option value="puma_rescate">Puma (Cachorro)</option>
+                            <option value="lobo_rescate">Lobo (Cachorro)</option>
+                            <option value="aguila_rescate">Águila</option>
+                            <option value="cabra_montes_rescate">Cabra Montés</option>
+                            <option value="jabali_rescate">Jabalí (Cría)</option>
+                            <option value="canguro_rescate">Canguro (Joey)</option>
+                            <option value="mono_rescate">Mono (Pequeño)</option>
+                        </optgroup>
+                        <optgroup label="Exóticos (Otros)">
+                            <option value="suricata">Suricata</option>
+                            <option value="iguana_rhino">Iguana Rinoceronte</option>
+                            <option value="mono_titi">Mono Tití</option>
+                            <option value="ocelote">Ocelote (Híbrido)</option>
+                            <option value="coati">Coati</option>
+                            <option value="cerdo_hormiguero">Cerdo Hormiguero</option>
+                            <option value="gato_civeta">Gato Civeta</option>
+                            <option value="nutria_marina_mascota">Nutria Marina (Exótica)</option>
+                            <option value="genetta">Genetta</option>
+                            <option value="zorrillo_domestico">Zorrillo (Domesticado)</option>
+                            <option value="armadillo_mascota">Armadillo</option>
+                            <option value="lemur">Lémur</option>
+                            <option value="fennec_zorro">Fennec (Zorro del Desierto)</option>
+                            <option value="civet_palma">Civeta de Palma</option>
+                            <option value="possum">Possum</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sintomas">Síntomas:</label>
+                    <textarea id="sintomas" rows="5" maxlength="400" required></textarea>
+                </div>
+
+                <button type="submit" id="btnGuardarCita">Guardar Cita</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Confirmar Eliminación</h2>
+            <p>¿Estás seguro de que deseas eliminar esta cita?</p>
+            <div class="modal-actions">
+                <button id="btnConfirmEliminar">Sí, Eliminar</button>
+                <button id="btnCancelEliminar">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
